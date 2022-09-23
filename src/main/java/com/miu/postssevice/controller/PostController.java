@@ -12,7 +12,7 @@ import java.util.List;
 
 @RestController
 @AllArgsConstructor
-@RequestMapping("/Posts")
+@RequestMapping("/posts")
 public class PostController {
     @Autowired
     private final PostService postService;
