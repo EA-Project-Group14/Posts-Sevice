@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -23,21 +24,21 @@ public class PostController {
     }
 
     @GetMapping("/user/{userId}")
-    public List<PostResponse> getUserPosts(@PathVariable Long userId){
+    public List<PostResponse> getUserPosts(@Valid @PathVariable Long userId){
         return postService.getUserPosts(userId);
     }
     @PostMapping
-    public void save(PostRequest post){
+    public void save(@Valid PostRequest post){
         postService.save(post);
     }
 
     @DeleteMapping
-    public void delete(Long postId){
+    public void delete(@Valid Long postId){
         postService.delete(postId);
     }
 
     @PutMapping
-    public PostResponse update(UpdatePostRequest postRequest){
+    public PostResponse update(@Valid UpdatePostRequest postRequest){
         return postService.update(postRequest);
     }
 

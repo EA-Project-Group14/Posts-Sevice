@@ -1,5 +1,6 @@
 package com.miu.postssevice.service.Impl;
 
+import com.miu.postssevice.client.CommentClient;
 import com.miu.postssevice.dto.request.PostRequest;
 import com.miu.postssevice.dto.request.UpdatePostRequest;
 import com.miu.postssevice.dto.response.PostResponse;
@@ -11,6 +12,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,9 +24,14 @@ public class PostServiceImpl implements PostService {
     @Autowired
     private ModelMapper modelMapper;
 
+    @Autowired
+    private CommentClient commentClient;
+
     @Override
-    public void save(PostRequest post) {
-        postRepository.save(modelMapper.map(post,Post.class));
+    public void save(PostRequest postRequest) {
+        Post post = modelMapper.map(postRequest,Post.class);
+        post.setCreateDate(LocalDateTime.now());
+        postRepository.save(post);
     }
 
     @Override
@@ -38,19 +45,25 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public void delete(Long postId) {
+        commentClient.deletePostComments(postId);
         postRepository.deleteById(postId);
     }
 
     @Override
-    public PostResponse update(UpdatePostRequest post) {
-        return modelMapper.map(postRepository.save(modelMapper.map(post,Post.class)),PostResponse.class);
+    public PostResponse update(UpdatePostRequest updatePostRequest) {
+        Post post = modelMapper.map(updatePostRequest,Post.class);
+        post.setUpdateDate(LocalDateTime.now());
+        postRepository.save(post);
+        return modelMapper.map(postRepository.save(post),PostResponse.class);
     }
 
     @Override
     public List<PostResponse> getUserPosts(Long userId) {
         List<PostResponse> posts = new ArrayList<>();
         for(Post temp : postRepository.getPostsByUserId(userId)){
-            posts.add(modelMapper.map(temp,PostResponse.class));
+            PostResponse response = modelMapper.map(temp,PostResponse.class);
+            response.setComments(commentClient.getCommentsByPostId(temp.getId()));
+            posts.add(response);
         }
         return posts;
     }

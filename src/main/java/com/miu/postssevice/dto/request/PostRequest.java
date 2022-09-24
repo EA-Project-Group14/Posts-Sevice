@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -12,9 +14,9 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PostRequest {
+    @NotNull
     private long userId;
+    @NotEmpty
     private String content;
-    private LocalDateTime createDate;
-    private LocalDateTime updateDate;
-    private List<Attachment> attachments;
+    private List<AttachmentRequest> attachments;
 }
