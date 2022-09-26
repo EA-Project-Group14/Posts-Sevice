@@ -1,5 +1,6 @@
 package com.miu.postssevice.service.Impl;
 
+import com.miu.postssevice.client.CommentClient;
 import com.miu.postssevice.dto.request.PostRequest;
 import com.miu.postssevice.dto.request.UpdatePostRequest;
 import com.miu.postssevice.dto.response.PostResponse;
@@ -24,9 +25,11 @@ public class PostServiceImpl implements PostService {
     @Autowired
     private ModelMapper modelMapper;
 
+    @Autowired
+    private CommentClient commentClient;
+
     @Override
     public void save(PostRequest postRequest) {
-        System.out.println("postRequest.getUserId() = " + postRequest.getUserId());
         Post post = modelMapper.map(postRequest, Post.class);
         post.setLastUpdate(LocalDateTime.now().toString());
         postRepository.save(post);
@@ -43,6 +46,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public void delete(Long postId) {
+        commentClient.deletePostComments(postId);
         postRepository.deleteById(postId);
     }
 
@@ -67,7 +71,9 @@ public class PostServiceImpl implements PostService {
     public List<PostResponse> getUserPosts(Long userId) {
         List<PostResponse> posts = new ArrayList<>();
         for(Post temp : postRepository.getPostsByUserId(userId)){
-            posts.add(modelMapper.map(temp,PostResponse.class));
+            PostResponse response = modelMapper.map(temp,PostResponse.class);
+            response.setComments(commentClient.getCommentsByPostId(temp.getId()));
+            posts.add(response);
         }
         return posts;
     }
