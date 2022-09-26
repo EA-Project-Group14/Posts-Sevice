@@ -11,8 +11,10 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 public class PostServiceImpl implements PostService {
@@ -23,8 +25,11 @@ public class PostServiceImpl implements PostService {
     private ModelMapper modelMapper;
 
     @Override
-    public void save(PostRequest post) {
-        postRepository.save(modelMapper.map(post,Post.class));
+    public void save(PostRequest postRequest) {
+        System.out.println("postRequest.getUserId() = " + postRequest.getUserId());
+        Post post = modelMapper.map(postRequest, Post.class);
+        post.setLastUpdate(LocalDateTime.now().toString());
+        postRepository.save(post);
     }
 
     @Override
@@ -42,8 +47,20 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public PostResponse update(UpdatePostRequest post) {
-        return modelMapper.map(postRepository.save(modelMapper.map(post,Post.class)),PostResponse.class);
+    public PostResponse update(Long postId, UpdatePostRequest updatePostRequest) {
+        Post post = postRepository.findById(postId).orElseThrow(() -> new NoSuchElementException("No Post found with id: " + postId));
+        if (!post.getContent().equals(updatePostRequest.getContent())) {
+            post.setContent(updatePostRequest.getContent());
+            post.setLastUpdate(LocalDateTime.now().toString());
+        }
+        updatePostRequest.getAttachments().stream()
+                .filter(attachment -> !post.getAttachments().contains(attachment))
+                .forEach(attachment -> {
+                    post.getAttachments().add(attachment);
+                    post.setLastUpdate(LocalDateTime.now().toString());
+                });
+        postRepository.save(post);
+        return modelMapper.map(post, PostResponse.class);
     }
 
     @Override

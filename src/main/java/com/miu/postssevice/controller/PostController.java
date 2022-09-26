@@ -22,23 +22,24 @@ public class PostController {
         return postService.getAllPosts();
     }
 
-    @GetMapping("/user/{userId}")
-    public List<PostResponse> getUserPosts(@PathVariable Long userId){
+    @GetMapping(params = "userId")
+    public List<PostResponse> getUserPosts(Long userId){
         return postService.getUserPosts(userId);
     }
     @PostMapping
-    public void save(PostRequest post){
+    public void save(@RequestBody PostRequest post){
+        System.out.println("post.getUserId() = " + post.getUserId());
         postService.save(post);
     }
 
-    @DeleteMapping
-    public void delete(Long postId){
+    @DeleteMapping("/{postId}")
+    public void delete(@PathVariable Long postId){
         postService.delete(postId);
     }
 
-    @PutMapping
-    public PostResponse update(UpdatePostRequest postRequest){
-        return postService.update(postRequest);
+    @PutMapping("/{postId}")
+    public PostResponse update(@PathVariable Long postId, @RequestBody UpdatePostRequest postRequest){
+        return postService.update(postId, postRequest);
     }
 
 

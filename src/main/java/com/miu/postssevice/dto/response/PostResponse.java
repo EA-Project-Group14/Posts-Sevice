@@ -14,7 +14,6 @@ public class PostResponse {
     private long id;
     private long userId;
     private String content;
-    private LocalDateTime createDate;
-    private LocalDateTime updateDate;
+    private String lastUpdate;
     private List<Attachment> attachments;
 }

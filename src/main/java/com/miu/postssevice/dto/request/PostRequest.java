@@ -1,5 +1,6 @@
 package com.miu.postssevice.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.miu.postssevice.entity.Attachment;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -14,7 +15,5 @@ import java.util.List;
 public class PostRequest {
     private long userId;
     private String content;
-    private LocalDateTime createDate;
-    private LocalDateTime updateDate;
     private List<Attachment> attachments;
 }
