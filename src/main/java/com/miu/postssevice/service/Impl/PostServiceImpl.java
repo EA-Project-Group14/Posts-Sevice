@@ -11,6 +11,7 @@ import org.hibernate.sql.Update;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 @Service
+@Transactional
 public class PostServiceImpl implements PostService {
 
     @Autowired
@@ -39,7 +41,10 @@ public class PostServiceImpl implements PostService {
     public List<PostResponse> getAllPosts() {
         List<PostResponse> posts = new ArrayList<>();
         for(Post temp : postRepository.findAll()){
-            posts.add(modelMapper.map(temp,PostResponse.class));
+//            posts.add(modelMapper.map(temp,PostResponse.class));
+            PostResponse response = modelMapper.map(temp,PostResponse.class);
+            response.setComments(commentClient.getCommentsByPostId(temp.getId()));
+            posts.add(response);
         }
         return posts;
     }
@@ -51,13 +56,13 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public PostResponse update(Long postId, UpdatePostRequest updatePostRequest) {
+    public PostResponse update(Long postId, PostRequest postRequest) {
         Post post = postRepository.findById(postId).orElseThrow(() -> new NoSuchElementException("No Post found with id: " + postId));
-        if (!post.getContent().equals(updatePostRequest.getContent())) {
-            post.setContent(updatePostRequest.getContent());
+        if (!post.getContent().equals(postRequest.getContent())) {
+            post.setContent(postRequest.getContent());
             post.setLastUpdate(LocalDateTime.now().toString());
         }
-        updatePostRequest.getAttachments().stream()
+        postRequest.getAttachments().stream()
                 .filter(attachment -> !post.getAttachments().contains(attachment))
                 .forEach(attachment -> {
                     post.getAttachments().add(attachment);
